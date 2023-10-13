@@ -1,0 +1,10 @@
+{
+	"name": "monolog/monolog",
+	"description": "Monolog",
+	"autoload": {
+		"psr-4": {
+			"Monolog\\Monolog\\": "src/"
+		}
+	},
+	"require": {}
+}
