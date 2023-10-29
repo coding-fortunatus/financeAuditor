@@ -1,3 +1,25 @@
+<?php
+session_start();
+require_once "./includes/functions.php";
+require_once "./includes/config.php";
+
+if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
+    header("Location: financialStatement.php");
+} else {
+    if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['continue'])) {
+            $agreement = $_POST['agreed'];
+        if (proceed($agreement)) {
+            $_SESSION['license'] = true;
+            header("Location: financialStatement.php");
+        } else {
+            $_SESSION['license'] = false;
+            header("Location: terms.php");
+        }
+    }
+}
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -65,6 +87,7 @@
                 </ul>
             </nav>
             <!-- .nav-menu -->
+            <a class="nav-item btn btn-danger text-center" href="./includes/logout.php">Logout</a>
         </div>
     </header>
     <!-- End Header -->
@@ -108,14 +131,13 @@
                             in this Agreement.
                         </p>
                         <div>
-                            <form action="" method="post">
+                            <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" value="" name="agreed"
-                                        id="flexCheckDefault" checked>
+                                        id="flexCheckDefault" required>
                                     <label class="form-check-label" for="flexCheckDefault">
                                         I agree with the license statements.
                                     </label>
-                                    <span><?php echo ''; ?></span>
                                 </div>
                                 <div class="d-grid d-md-block">
                                     <input class="btn btn-primary" value="Continue" name="continue" type="submit">

@@ -1,3 +1,96 @@
+<?php
+session_start();
+require_once "./includes/functions.php";
+require_once "./includes/config.php";
+
+require_once "./vendor/autoload.php";
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+
+if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
+    $message = "";
+
+    // Process Budget datas
+    if (isset($_POST['financial_budgets'])) {
+        // Allowed mime types
+        $excelMimes = array('text/xls', 'text/xlsx', 'application/excel', 'application/vnd.msexcel', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        // Validate the uploaded file if it's excel file
+        if (!empty($_FILES['budgets']['name']) && in_array($_FILES['budgets']['type'], $excelMimes)) {
+            // check if the file is uploaded using POST method
+            if (is_uploaded_file($_FILES['budgets']['tmp_name'])) {
+                $budget_reader = new Xlsx();
+                $spreadsheets = $budget_reader->load($_FILES['budgets']['tmp_name']);
+                $worksheet = $spreadsheets->getActiveSheet();
+                $worksheet_array = $worksheet->toArray();
+
+                // Header row from the data
+                unset($worksheet_array[0]);
+
+                foreach($worksheet_array as $row) {
+                    $item_name = $row[0];
+                    $quantity = (int)$row[1];
+                    $budget_price = (float)$row[2];
+                    $total_price = (float)$row[3];
+
+                    $user_id = $_SESSION['user_id'];
+
+                    $insert = "INSERT INTO budgets (user_id, item_name, quantity, budget_price, totals)VALUES($user_id, '$item_name', $quantity, $budget_price, $total_price)";
+                    if (mysqli_query($conn, $insert)) {
+                        $message = "<span class='text-info'>Budgets successfully uploaded</span>";
+                    } else {
+                        $message = "<span class='text-warning'>An error occured, try again later</span>";
+                    }
+                }
+            }
+        }else {
+            $message = "<span class='text-warning'>Expenses invalid file type</span>";
+        }
+    }
+
+    // Process Expenses Data
+    if (isset($_POST['financial_expenditure'])) {
+        // Allowed mime types
+        $excelMimes = array('text/xls', 'text/xlsx', 'application/excel', 'application/vnd.msexcel', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        // Validate the uploaded file if it's excel file
+        if (!empty($_FILES['expenses']['name']) && in_array($_FILES['expenses']['type'], $excelMimes)) {
+            // check if the file is uploaded using POST method
+            if (is_uploaded_file($_FILES['expenses']['tmp_name'])) {
+                $reader = new Xlsx();
+                $spreadsheet = $reader->load($_FILES['expenses']['tmp_name']);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $worksheet_arr = $worksheet->toArray();
+
+                // Header row from the data
+                unset($worksheet_arr[0]);
+
+                foreach($worksheet_arr as $row) {
+                    $item_name = $row[0];
+                    $quantity = (int)$row[1];
+                    $actual_price = (float)$row[2];
+                    $total_price = (float)$row[3];
+
+                    $user_id = $_SESSION['user_id'];
+
+                    // Check if there are expenses uploaded by the current user
+                    $insert = "INSERT INTO expenses(user_id, item_name, quantity, actual_price, totals)VALUES($user_id, '$item_name', $quantity, $actual_price, $total_price)";
+                    if (mysqli_query($conn, $insert)) {
+                        $message = "<span class='text-info'>Expenses successfully uploaded</span>";
+                    } else {
+                        $message = "<span class='text-warning'>Expenses an error occured, try again later</span>";
+                    }
+                }
+            }
+        } else {
+            $message = "<span class='text-warning'>Expenses invalid file type</span>";
+        }
+    }
+} else {
+    header("Location: terms.php");
+}
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -65,6 +158,7 @@
                 </ul>
             </nav>
             <!-- .nav-menu -->
+            <a class="nav-item btn btn-danger text-center" href="./includes/logout.php">Logout</a>
         </div>
     </header>
     <!-- End Header -->
@@ -76,6 +170,7 @@
                 <div class="section-title">
                     <h2>Upload Financial Statments (Budgets and Expenditures)</h2>
                 </div>
+                <?php echo $message; ?>
                 <div class="card">
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs">
@@ -93,10 +188,11 @@
                             <div class="card">
                                 <div class="card-header bg-secondary text-white">Financial Budgets</div>
                                 <div class="card-body">
-                                    <form action="" method="post">
+                                    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST"
+                                        enctype="multipart/form-data">
                                         <div class="input-group mb-3">
                                             <input type="file" class="form-control" accept=".xls, .xlsx" name="budgets"
-                                                id="budgets">
+                                                id="budgets" required>
                                         </div>
                                         <div class="d-grid d-md-block">
                                             <input class="btn btn-primary" value="Upload Budgets"
@@ -110,10 +206,11 @@
                             <div class="card">
                                 <div class="card-header bg-secondary text-white">Financial Expenditures</div>
                                 <div class="card-body">
-                                    <form action="" method="post">
+                                    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST"
+                                        enctype="multipart/form-data">
                                         <div class="input-group mb-3">
                                             <input type="file" accept=".xls, .xlsx" class="form-control" name="expenses"
-                                                id="expenses">
+                                                id="expenses" required>
                                         </div>
                                         <div class="d-grid d-md-block">
                                             <input class="btn btn-primary" value="Upload Expenses"
@@ -125,13 +222,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div>
-
-                    </div>
-                </div>
-            </div>
             </div>
         </section>
         <!-- End About Section -->

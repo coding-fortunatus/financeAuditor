@@ -1,3 +1,9 @@
+<?php
+session_start();
+require_once "./includes/functions.php";
+require_once "./includes/config.php";
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,8 +46,10 @@
             <div class="profile">
                 <img src="assets/img/profile-img.jpg" alt="" class="img-fluid rounded-circle" />
                 <h1 class="text-light">
-                    <a href="index.php">Welcome Here</a>
+                    <a href="index.php">Welcome Here</a><br>
+                    <Small><?php echo $_SESSION['firstname']; ?></Small>
                 </h1>
+
             </div>
 
             <nav id="navbar" class="nav-menu navbar">
@@ -65,6 +73,7 @@
                 </ul>
             </nav>
             <!-- .nav-menu -->
+            <a class="nav-item btn btn-danger text-center" href="./includes/logout.php">Logout</a>
         </div>
     </header>
     <!-- End Header -->
@@ -72,7 +81,7 @@
     <!-- ======= Hero Section ======= -->
     <section id="hero" class="d-flex flex-column justify-content-center align-items-center">
         <div class="hero-container" data-aos="fade-in">
-            <h1>Financial Auditor System</h1>
+            <h1>Financial Audit System</h1>
             <p>
                 Auditor for
                 <span class="typed"

@@ -1,4 +1,40 @@
 <?php
+require_once "./includes/functions.php";
+require_once "./includes/config.php";
+
+$firtname = $lastname = $email = $password = $message = $cpass = $agree = "";
+$firtname_error = $lastname_error = $email_error = $password_error = $cpass_error = "";
+
+if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['register'])) {
+    
+    $firtname = input_validator($_POST['firstname']);
+    $lastname = input_validator($_POST['lastname']);
+    $email = input_validator($_POST['email']);
+    $password = input_validator($_POST['password']);
+    $cpass = input_validator($_POST['cpass']);
+
+    if ($password !== $cpass) {
+        $password_error = "Mismatch!";
+        $cpass_error = "Mismatch!";
+    }
+
+    if (empty($password_error) && empty($cpass_error)) {
+        
+        // Register the user
+        $result = register($firtname, $lastname, $email, $password);
+        
+        if ($result == "exists") {
+            $message = "<span class='text-warning mb-2'>Email already exists!</span>";
+        } else if ($result == "success") {
+            $message = "<span class='text-success mb-2'>Registration successful</span>";
+        } elseif ($result == "errors") {
+            $message = "<span class='text-danger mb-2'>Oops! An error occured</span>";
+        } else {
+            $message = "";
+        }
+    }
+}
+
 
 ?>
 <!DOCTYPE html>
@@ -47,41 +83,39 @@
         <div class="form-right">
             <form action="" method="POST">
                 <h2 class="text-uppercase">Registration form</h2>
+                <?php echo $message; ?>
                 <div class="row">
-                    <div class="col-sm-6 mb-3">
+                    <div class="col-sm-6 mb-2">
                         <label>First Name</label>
-                        <input type="text" name="first_name" id="first_name" class="input-field">
-                        <span class="text-danger"></span>
+                        <input type="text" name="firstname" id="first_name" class="input-field" required>
                     </div>
-                    <div class="col-sm-6 mb-3">
+                    <div class="col-sm-6 mb-2">
                         <label>Last Name</label>
-                        <input type="text" name="last_name" id="last_name" class="input-field">
-                        <span class="text-danger"></span>
+                        <input type="text" name="lastname" id="last_name" class="input-field" required>
                     </div>
                 </div>
-                <div class="mb-3">
+                <div class="mb-2">
                     <label>Your Email</label>
-                    <input type="email" class="input-field" name="email">
-                    <span class="text-danger"></span>
+                    <input type="email" class="input-field" name="email" required>
+                    <span class="text-danger"><?php echo $email_error; ?></span>
                 </div>
                 <div class="row">
-                    <div class="col-sm-6 mb-3">
+                    <div class="col-sm-6 mb-2">
                         <label>Password</label>
-                        <input type="password" name="pwd" id="pwd" class="input-field">
-                        <span class="text-danger"></span>
+                        <input type="password" name="password" id="pwd" class="input-field" required>
+                        <span class="text-danger"><?php echo $password_error; ?></span>
                     </div>
-                    <div class="col-sm-6 mb-3">
+                    <div class="col-sm-6 mb-2">
                         <label>Confirm Password</label>
-                        <input type="password" name="cpwd" id="cpwd" class="input-field">
-                        <span class="text-danger"></span>
+                        <input type="password" name="cpass" id="cpwd" class="input-field" required>
+                        <span class="text-danger"><?php echo $cpass_error; ?></span>
                     </div>
                 </div>
-                <div class="mb-3">
+                <div class="mb-2">
                     <label class="option">I agree to the <a href="#">Terms and Conditions</a>
-                        <input type="checkbox" checked>
+                        <input type="checkbox" name="agree" required checked>
                         <span class="checkmark"></span>
                     </label>
-                    <span class="text-danger"></span>
                 </div>
                 <div class="form-field">
                     <input type="submit" value="Register" class="register" name="register">

@@ -5,10 +5,6 @@ define('USERNAME', 'root');
 define('PASSWORD', '');
 define('DB_NAME', 'financial_auditor');
 
-$username = "";
-$password = "";
-$dbname = "";
-
 $conn = mysqli_connect(HOSTNAME, USERNAME, PASSWORD, DB_NAME);
 
 if (!$conn) {

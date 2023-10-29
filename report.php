@@ -5,15 +5,14 @@ require_once "./includes/config.php";
 
 if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
 
+    // 
     $id = $_SESSION['user_id'];
-    // Get all budgets in the database
-    $budget_table = "budgets";
-    $budgets = displayStatements($id, $budget_table);
-
-    // Get all expenses in the database
-    $expenses_table = "expenses";
-    $expenses = displayStatements($id, $expenses_table);
-    
+    $report_table = "reports";
+    // Check if the audit report is generated all ready
+    $reports = displayStatements($id, $report_table);
+    if (mysqli_num_rows($reports) == 0) {
+        makeReports();
+    }
 } else {
     header("Location: terms.php");
 }
@@ -69,19 +68,19 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
             <nav id="navbar" class="nav-menu navbar">
                 <ul>
                     <li>
-                        <a href="index.php" class="nav-link scrollto"><i class="bx bx-home"></i>
+                        <a href="index.php" class="nav-link"><i class="bx bx-home"></i>
                             <span>Home</span></a>
                     </li>
                     <li>
-                        <a href="terms.php" class="nav-link scrollto"><i class="bx bx-pencil"></i>
+                        <a href="terms.php" class="nav-link"><i class="bx bx-pencil"></i>
                             <span>License</span></a>
                     </li>
                     <li>
-                        <a href="financialStatement.php" class="nav-link active"><i class="bx bx-file"></i>
+                        <a href="financialStatement.php" class="nav-link"><i class="bx bx-file"></i>
                             <span>Financial Statments</span></a>
                     </li>
                     <li>
-                        <a href="report.php" class="nav-link scrollto"><i class="bx bx-book-content"></i>
+                        <a href="report.php" class="nav-link active"><i class="bx bx-book-content"></i>
                             <span>Audit Report</span></a>
                     </li>
                 </ul>
@@ -96,81 +95,54 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
         <!-- ======= About Section ======= -->
         <section id="about" class="about">
             <div class="container">
-                <div class="section-title">
-                    <h2>View Financial Statments (Budgets and Expenditures)</h2>
+                <div class="section-title d-print-none">
+                    <h2>View Financial Reports</h2>
+                    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST">
+                        <div class="row">
+                            <div class="col-2">
+                                <button type="submit" class="btn btn-info" name="export">
+                                    <i class="bi bi-download"></i> Export</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="card shadow">
-                    <div class="card-header">
-                        <ul class="nav nav-tabs card-header-tabs">
-                            <li class="nav-item">
-                                <a class="nav-link" href="./financialStatement.php">Upload</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="true" href="./view_statement.php">View
-                                    Statments</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="row mt-3 p-3">
-                        <div class="col-sm-6 mb-3 gx-5">
+                <div class="card shadow d-lg-block d-print-block">
+                    <div class="row mt-2 p-3">
+                        <div class="col-md-12">
                             <table class="table table-bordered border-primary table-hover table-reponsive">
-                                <div class="table-caption">Financial Budgets</div>
+                                <div class="table-caption">Audit Overviews</div>
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
                                         <th scope="col">Item Name</th>
                                         <th scope="col">Quantity</th>
                                         <th scope="col">Budget price (₦)</th>
-                                        <th scope="col">Total (₦)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                        if (mysqli_num_rows($budgets) > 0) {
-                                            while ($row = mysqli_fetch_assoc($budgets)) {
-                                                echo "
-                                                <tr>
-                                                    <th scope='row'>".$row['id']."</th>
-                                                    <td>".$row['item_name']."</td>
-                                                    <td>".$row['quantity']."</td>
-                                                    <td>".$row['budget_price']."</td>
-                                                    <td>".$row['totals']."</td>
-                                                </tr>
-                                                ";
-                                            }
-                                        }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="col-sm-6 mb-3 gx-5">
-                            <table class="table table-bordered border-danger table-hover table-reponsive">
-                                <div class="table-caption">Financial Expenditures</div>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Item Name</th>
-                                        <th scope="col">Quantity</th>
                                         <th scope="col">Actual price (₦)</th>
-                                        <th scope="col">Total (₦)</th>
+                                        <th scope="col">Differences (₦)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
-                                        if (mysqli_num_rows($expenses) > 0) {
-                                            while ($row = mysqli_fetch_assoc($expenses)) {
+                                        if (mysqli_num_rows($reports) > 0) {
+                                            while ($row = mysqli_fetch_assoc($reports)) {
                                                 echo "
                                                 <tr>
                                                     <th scope='row'>".$row['id']."</th>
                                                     <td>".$row['item_name']."</td>
                                                     <td>".$row['quantity']."</td>
-                                                    <td>".$row['actual_price']."</td>
-                                                    <td>".$row['totals']."</td>
+                                                    <td>".number_format($row['budget_price'])."</td>
+                                                    <td>".number_format($row['actual_price'])."</td>
+                                                    <td class=".colorize($row['differences']).">".number_format($row['differences'])."</td>
                                                 </tr>
                                                 ";
                                             }
                                         }
                                     ?>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="fw-bold">Totals</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

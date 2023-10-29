@@ -1,56 +1,32 @@
 <?php
 require_once './includes/config.php';
 require_once './includes/functions.php';
+session_start();
 
-$email = $password = $email_error = $password_errror = $login_error = "";
-
-if ($_SESSION['loggin'] == true) {
+if (isset($_SESSION['loggin']) == true) {
     header("Location: index.php");
 } else {
+    $email = $password = $email_error = $message = "";
+
     if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])) {
         // Validate user inputs
-        if (empty($_POST['email'])) {
-            $email_error = "Email cannot be empty!";
-        } else {
-            $email = input_validator($_POST['email']);
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $email_error = "Supply a valid email!";
-            }
+        $email = input_validator($_POST['email']);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $email_error = "Supply a valid email!";
         }
 
-        if (empty($_POST['password'])) {
-            $password_errror = "Password cannot be empty!";
-        } else {
-            $password = input_validator($_POST['password']);
-        }
+        $password = input_validator($_POST['password']);
+        
 
         // Check for error messages before proceeding
-        if (empty($email_error) && empty($password_errror)) {
-            // check if user exists in the database
-            $query = "SELECT * FROM users WHERE email = ?";
-            if ($stmt = mysqli_prepare($conn, $query)) {
-                mysqli_stmt_bind_param($stmt, "s", $email);
-                if (mysqli_stmt_execute($stmt)) {
-                    mysqli_stmt_store_result($stmt);
-                    if (mysqli_stmt_num_rows($stmt) == 1) {
-                        // If user exists with the email verify password
-                        mysqli_stmt_bind_result($stmt, $email, $hashed_password);
-                        if (mysqli_stmt_fetch($stmt)) {
-                            if (password_verify($password, $hashed_password)) {
-                                session_start();
-                                $_SESSION['loggin'] = true;
-                                header("Location: index.php");
-                            } else {
-                                $login_error = "Invalid email or password";
-                            }
-                        }
-                    } else {
-                        $login_error = "Invalid email or password";
-                    }
-                } else {
-                    $login_error = "Oops, an error occur!";
-                }
-                mysqli_stmt_close($stmt);
+        if (empty($email_error)) {          
+            $result = login($email, $password);
+            if ($result == "Invalid") {
+                $message = "<span class='text-warning'>Invalid login credentials</span>";
+            } elseif ($result == "Errors") {
+                $message = "<span class='text-warning'>Error, try again later</span>";
+            } else {
+                $message = "";
             }
         }
         mysqli_close($conn);
@@ -87,7 +63,7 @@ if ($_SESSION['loggin'] == true) {
 
 <body>
     <div class="wrapper">
-        <div class="form-left">
+        <div class="form-left mt-5">
             <h2 class="text-uppercase">information</h2>
             <p>
                 Unlock exclusive benefits by logging in now. Don't miss out on personalized experiences and exciting
@@ -101,19 +77,19 @@ if ($_SESSION['loggin'] == true) {
                 <a href="./register.php" class="account btn btn-outline-info">Don't Have an Account?</a>
             </div>
         </div>
-        <div class="form-right">
+        <div class="form-right mt-5">
             <form action="" method="POST">
                 <h2 class="text-uppercase">Login form</h2>
+                <?php echo $message; ?>
                 <div class="input-group mb-3">
                     <label>Your Email</label>
-                    <input type="text" class="input-field" name="email">
-                    <span class="text-danger"></span>
+                    <input type="email" class="input-field" name="email" required>
+                    <span class="text-danger"><?php echo $email_error; ?></span>
                 </div>
 
                 <div class="input-group mb-3">
                     <label>Password</label>
-                    <input type="password" name="password" id="pwd" class="input-field">
-                    <span class="text-danger"></span>
+                    <input type="password" name="password" id="pwd" class="input-field" required>
                 </div>
 
                 <div class="form-field">
