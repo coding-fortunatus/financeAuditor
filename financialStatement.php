@@ -6,8 +6,8 @@ require_once "./includes/config.php";
 require_once "./vendor/autoload.php";
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
-if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
-    $message = "";
+if (isset($_SESSION['loggin']) == true && (isset($_SESSION['license']) == true)) {
+    $message = $user_id = "";
 
     // Process Budget datas
     if (isset($_POST['financial_budgets'])) {

@@ -64,9 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['register'])) {
     <link href="assets/css/style.css" rel="stylesheet" />
 </head>
 
-<body>
+<body class="login-body-background">
     <div class="wrapper">
-        <div class="form-left">
+        <div class="form-left pt-5">
             <h2 class="text-uppercase">information</h2>
             <p>
                 Creating an account ensures that you the right and privilege to use our Web-based Financial Auditing

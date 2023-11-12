@@ -2,6 +2,9 @@
 
 
 // To validate the user inputs from the form
+
+use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
+
 function input_validator($data) {
     trim($data);
     stripslashes($data);
@@ -85,12 +88,12 @@ function displayStatements($id, $table) {
 
 
 // Generate repoprts by comparing values of different tables and storing the differences in another table
-function makeReports() {
+function makeReports($user_id) {
     global $conn;
     // Perform SQL JOIN operation on budgets and expenses tables using a common key (e.g., 'id')
     $sql = "SELECT budgets.id, budgets.user_id, budgets.item_name, budgets.quantity, budgets.budget_price, expenses.actual_price
         FROM budgets
-        LEFT JOIN expenses ON budgets.id = expenses.id AND budgets.user_id = expenses.user_id";
+        LEFT JOIN expenses ON budgets.id = expenses.id WHERE budgets.user_id = '$user_id' AND expenses.user_id = '$user_id'";
 
     $result = $conn->query($sql);
 
@@ -131,5 +134,35 @@ function colorize($data) {
     if ($data > 0)
         $color = "text-success";
     return $color;
+}
+
+
+// To check database for current user statement availabilities
+function checkTable($table_name, $user_id) {
+    global $conn;
+
+    $sql = "SELECT * FROM $table_name WHERE user_id = '$user_id'";
+    return mysqli_query($conn, $sql);
+}
+
+
+// To get the variance between the budget price and actual price of an item
+function getVariance($act_price, $bdg_price) {
+    if ($act_price == 0 || $bdg_price == 0) {
+        return "NIL";
+    }
+    $diff = $act_price - $bdg_price;
+    $variance = ($diff / $act_price) * 100;
+    return round($variance);
+}
+
+
+// To delete all statements and reports to upload a new 1
+function deleteStatements($user_id, $table) {
+    global $conn;
+
+    $del = "DELETE FROM $table WHERE user_id = $user_id";
+    $result = mysqli_query($conn, $del);
+    return $result;
 }
 ?>

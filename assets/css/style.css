@@ -450,13 +450,21 @@ section {
 	font-family: "Poppins", sans-serif;
 }
 
-body {
-	background: #fff;
+.login-body-background {
+	height: 100vh;
+	width: 100%;
+	color: white;
+	overflow: hidden;
+	background: #a59f9f;
+	background: linear-gradient(rgba(58, 56, 56, 0.8), rgba(58, 56, 56, 0.8)),
+		url("https://www.shutterstock.com/image-vector/nigerian-naira-banknote-isometric-icon-260nw-2115313127.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
 }
 
 .wrapper {
 	max-width: 850px;
-	background-color: #fff;
+	background-color: #f3f3f3;
 	border-radius: 10px;
 	position: relative;
 	display: flex;
@@ -539,7 +547,7 @@ body {
 .wrapper .form-right .input-field {
 	width: 100%;
 	padding: 10px 15px;
-	border: 1px solid #e5e5e5;
+	border: 1px solid #bdbdbd;
 	border-top-left-radius: 5px;
 	border-bottom-right-radius: 5px;
 	outline: none;

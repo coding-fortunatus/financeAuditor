@@ -4,7 +4,7 @@ require_once "./includes/functions.php";
 require_once "./includes/config.php";
 
 if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
-
+    $reports = "reports";
     $id = $_SESSION['user_id'];
     // Get all budgets in the database
     $budget_table = "budgets";
@@ -13,6 +13,19 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
     // Get all expenses in the database
     $expenses_table = "expenses";
     $expenses = displayStatements($id, $expenses_table);
+
+    if (isset($_POST['delete'])) {
+        $status1 = deleteStatements($id, $budget_table);
+        $status2 = deleteStatements($id, $expenses_table);
+        $status3 = deleteStatements($id, $reports);
+        if ($status1 == true && $status2 == true && $status3 == true) {
+            echo '
+            <script>
+                alert("Are you sure you want to delete!");
+            </script>
+            ';
+        }
+    }
     
 } else {
     header("Location: terms.php");
@@ -99,6 +112,16 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
                 <div class="section-title">
                     <h2>View Financial Statments (Budgets and Expenditures)</h2>
                 </div>
+                <div class="row mt-0 pt-0">
+                    <div class="col-3 mt-0 pt-0 mb-2">
+                        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
+                            <div class="d-grid d-md-block">
+                                <input class="btn btn-outline-danger" value="Truncate Statements" name="delete"
+                                    type="submit">
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div class="card shadow">
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs">
@@ -112,7 +135,7 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
                         </ul>
                     </div>
                     <div class="row mt-3 p-3">
-                        <div class="col-sm-6 mb-3 gx-5">
+                        <div class="col-sm-12 col-md-12 col-lg-6 mb-3 gx-5">
                             <table class="table table-bordered border-primary table-hover table-reponsive">
                                 <div class="table-caption">Financial Budgets</div>
                                 <thead>
@@ -143,7 +166,7 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
                                 </tbody>
                             </table>
                         </div>
-                        <div class="col-sm-6 mb-3 gx-5">
+                        <div class="col-sm-12 col-md-12 col-lg-6 mb-3 gx-5">
                             <table class="table table-bordered border-danger table-hover table-reponsive">
                                 <div class="table-caption">Financial Expenditures</div>
                                 <thead>

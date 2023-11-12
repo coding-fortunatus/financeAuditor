@@ -61,9 +61,9 @@ if (isset($_SESSION['loggin']) == true) {
     <link href="assets/css/style.css" rel="stylesheet" />
 </head>
 
-<body>
+<body class="login-body-background">
     <div class="wrapper">
-        <div class="form-left mt-5">
+        <div class="form-left pt-5">
             <h2 class="text-uppercase">information</h2>
             <p>
                 Unlock exclusive benefits by logging in now. Don't miss out on personalized experiences and exciting

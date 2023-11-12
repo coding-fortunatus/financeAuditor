@@ -47,7 +47,12 @@ require_once "./includes/config.php";
                 <img src="assets/img/profile-img.jpg" alt="" class="img-fluid rounded-circle" />
                 <h1 class="text-light">
                     <a href="index.php">Welcome Here</a><br>
-                    <Small><?php echo $_SESSION['firstname']; ?></Small>
+                    <Small><?php 
+                        if (isset($_SESSION['firstname'])) {
+                            echo $_SESSION['firstname'];
+                        }
+                        ?>
+                    </Small>
                 </h1>
 
             </div>

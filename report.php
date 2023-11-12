@@ -6,12 +6,12 @@ require_once "./includes/config.php";
 if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
 
     // 
-    $id = $_SESSION['user_id'];
+    $user_id = $_SESSION['user_id'];
     $report_table = "reports";
     // Check if the audit report is generated all ready
-    $reports = displayStatements($id, $report_table);
+    $reports = displayStatements($user_id, $report_table);
     if (mysqli_num_rows($reports) == 0) {
-        makeReports();
+        makeReports($user_id);
     }
 } else {
     header("Location: terms.php");
@@ -53,7 +53,7 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
 
 <body>
     <!-- ======= Mobile nav toggle button ======= -->
-    <i class="bi bi-list mobile-nav-toggle d-xl-none"></i>
+    <i class="d-print-none bi bi-list bg-info mobile-nav-toggle d-xl-none"></i>
 
     <!-- ======= Header ======= -->
     <header id="header">
@@ -97,18 +97,22 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
             <div class="container">
                 <div class="section-title d-print-none">
                     <h2>View Financial Reports</h2>
-                    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST">
+                    <form>
                         <div class="row">
                             <div class="col-2">
-                                <button type="submit" class="btn btn-info" name="export">
-                                    <i class="bi bi-download"></i> Export</button>
+                                <button type="button" class="btn btn-info" onclick="window.print()">
+                                    <i class="bi bi-printer"></i> Export</button>
                             </div>
                         </div>
                     </form>
                 </div>
+
                 <div class="card shadow d-lg-block d-print-block">
+                    <div class="d-none d-print-block">
+                        <h2 class="h2 mb-3 text-center fw-bold">AUDIT REPORT</h2>
+                    </div>
                     <div class="row mt-2 p-3">
-                        <div class="col-md-12">
+                        <div class="col-md-12 col-sm-8">
                             <table class="table table-bordered border-primary table-hover table-reponsive">
                                 <div class="table-caption">Audit Overviews</div>
                                 <thead>
@@ -119,29 +123,44 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
                                         <th scope="col">Budget price (₦)</th>
                                         <th scope="col">Actual price (₦)</th>
                                         <th scope="col">Differences (₦)</th>
+                                        <th scope="col">Variances (%)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
+                                    $total_budget_price = 0;
+                                    $total_actual_price = 0;
+                                    $total_diffs = 0;
                                         if (mysqli_num_rows($reports) > 0) {
                                             while ($row = mysqli_fetch_assoc($reports)) {
+                                                $total_budget_price += $row['budget_price'];
+                                                $total_actual_price += $row['actual_price'];
+                                                $total_diffs += $row['differences'];
                                                 echo "
                                                 <tr>
-                                                    <th scope='row'>".$row['id']."</th>
+                                                    <th scope='row'>".$row['id']."</th> 
                                                     <td>".$row['item_name']."</td>
                                                     <td>".$row['quantity']."</td>
                                                     <td>".number_format($row['budget_price'])."</td>
                                                     <td>".number_format($row['actual_price'])."</td>
                                                     <td class=".colorize($row['differences']).">".number_format($row['differences'])."</td>
+                                                    <td>".getVariance($row['actual_price'], $row['budget_price'])."</td>
                                                 </tr>
                                                 ";
                                             }
                                         }
                                     ?>
                                     <tr>
-                                        <td></td>
-                                        <td></td>
+                                        <td class="text-center bg-dark"></td>
+                                        <td class="text-center bg-dark"></td>
                                         <td class="fw-bold">Totals</td>
+                                        <td class="bg-info text-white"><?= number_format($total_budget_price) ?>
+                                        </td>
+                                        <td class="bg-success text-white"><?= number_format($total_actual_price) ?>
+                                        </td>
+                                        <td class="bg-warning text-white"><?= number_format($total_diffs) ?></td>
+                                        <td class="bg-danger text-white">
+                                            <?= getVariance($total_actual_price, $total_budget_price) ?></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -149,13 +168,62 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
                     </div>
                 </div>
             </div>
+            <div class="d-none d-print-block m-2 p-3">
+                <!-- <h2 class="h2 mb-3 text-center fw-bold">AUDIT REPORT</h2> -->
+                <h5 class="h5 mt-3 mb-3">The table above show an overview of the user financial statement audit
+                    report.
+                </h5>
+                <h5 class="h5 mb-2">In Auditing Financial Statemets;</h5>
+                <ol>
+                    <li class="h5 mb-2">When expenses are below the budget, it might be described as a <span
+                            class="fw-bold">Favorable
+                            Variance</span>
+                    </li>
+                    <li class="h5 mb-2">When expenses are exactly on budget, it often termed <span
+                            class="fw-bold capitalized">Zero
+                            Variance</span>
+                    </li>
+                    <li class="h5 mb-2">When expenses exceed the budget, it's referred to as an <span
+                            class="fw-bold">Unfavorable
+                            Variance</span> or <span class="fw-bold">Adverse
+                            Variance</span>
+                    </li>
+                </ol>
+                <p class="h5 mb-2">These terms help auditors and stakeholders understand
+                    the variations between planned and actual expenses.
+                </p>
+                <p class="h5 mb-2">
+                <h4 class="mb-2 fw-bold">Variance Explained</h4>
+                Variance in these system is the percentage(%) increase (+ve differences)
+                between the budge price and actual price. The formula is as folows; <br>
+                VARIANCE = ((actual price - budget price ) / actual price) * 100%
+                </p>
+                <p class="h5 mb-2">
+                <h4 class="mb-2 fw-bold">Audit Conclusion</h4>
+                In the context of your financial statement <?php echo $_SESSION['firstname'] ?>, your financial
+                statement variance is <?= getVariance($total_actual_price, $total_budget_price) ?> therefore, we
+                conclude the your statement is having
+                <span class="fw-bold text-warning">
+                    <?php if (getVariance($total_actual_price, $total_budget_price) > 0): ?>
+                    Unfavorable Variance.
+                    <?php elseif(getVariance($total_actual_price, $total_budget_price) < 0): ?>
+                    Favorable Variance.
+                    <?php else: ?>
+                    Zero Variance.
+                    <?php endif ?>
+                </span>
+                </p>
+                <p class="h4">
+                    Thank you for using our FINANCIAL STATEMENT AUDITING SYSTEM.
+                </p>
+            </div>
         </section>
         <!-- End About Section -->
     </main>
     <!-- End #main -->
 
 
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+    <a href="#" class="back-to-top d-print-none d-flex align-items-center justify-content-center"><i
             class="bi bi-arrow-up-short"></i></a>
 
     <!-- Vendor JS Files -->

@@ -4,16 +4,18 @@ This project is a PHP and MySQL-based finance audit system. It allows users to t
 
 ## Features:
 
-Track all financial transactions, including income, expenses, and transfers.
+Track all financial transactions, including budgets, and expenses.
 Create and manage budgets.
-Generate reports on financial performance, including income statements, balance sheets, and cash flow statements.
-Export reports to PDF or CSV format.
+Generate reports on financial performance, balance sheets.
+Export reports to PDF.
 
 ## Requirements:
+
 PHP 7.2 or higher
 MySQL 5.7 or higher
 
 ## Installation:
+
 Clone the repository to your local machine:
 git clone https://github.com/coding-fortunatus/financeAuditor.git
 Create a database for the project.
@@ -26,15 +28,14 @@ SOURCE database.sql;
 Start the development server
 
 ## Usage:
+
 Once the project is installed and running, you can access it in your web browser at http://localhost:(PORT).
 
 To create an account, click on the "Sign Up" link. Once you have created an account, you can sign in and start tracking your financial transactions.
 
-To track a new transaction, click on the "Add Transaction" button. Enter the transaction details and click on the "Save" button.
-
 To create a budget, click on the "Create Budget" button. Enter the budget details and click on the "Save" button.
 
-To generate a report, click on the "Reports" tab. Select the report you want to generate and click on the "Generate Report" button.
+To generate a report, click on the "Reports" tab. Select the report you want to generate and click on the "Export" button.
 
 ## Contributing:
 
