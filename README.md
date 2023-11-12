@@ -19,10 +19,8 @@ MySQL 5.7 or higher
 Clone the repository to your local machine:
 git clone https://github.com/coding-fortunatus/financeAuditor.git
 Create a database for the project.
-mysql -u root -p
 CREATE DATABASE (Check the DB configuration for reference);
 Import the database schema:
-mysql -u root -p finance_audit
 SOURCE database.sql;
 
 Start the development server
