@@ -168,6 +168,7 @@ if (isset($_SESSION['loggin']) == true && isset($_SESSION['license']) == true) {
                     </div>
                 </div>
             </div>
+
             <div class="d-none d-print-block m-2 p-3">
                 <!-- <h2 class="h2 mb-3 text-center fw-bold">AUDIT REPORT</h2> -->
                 <h5 class="h5 mt-3 mb-3">The table above show an overview of the user financial statement audit
